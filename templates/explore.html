@@ -1,149 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}Jelajahi Paste — DevPaste{% endblock %}
+{% block title %}Jelajahi — DevPaste{% endblock %}
 
 {% block content %}
-<div class="container py-4">
 
-  <!-- Halaman Header -->
-  <div class="explore-header mb-4">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-      <div>
-        <h1 class="explore-title"><i class="bi bi-compass me-2 text-accent"></i>Jelajahi</h1>
-        <p class="explore-subtitle">Temukan snippet kode publik dari komunitas.</p>
-      </div>
-      <div class="explore-stats d-flex gap-3">
-        <div class="stat-chip">
-          <span class="stat-value">{{ stats.total }}</span>
-          <span class="stat-label">Total Paste</span>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-value">{{ stats.public }}</span>
-          <span class="stat-label">Public</span>
-        </div>
-      </div>
-    </div>
+<!-- Header -->
+<div class="explore-header">
+  <div class="header-eyebrow">
+    <span class="pulse"></span>
+    Public Pastes
   </div>
+  <h1 class="page-title">
+    Jelajahi <span class="accent">Paste</span>
+  </h1>
+  <div class="header-divider"></div>
+</div>
 
-  <!-- Search & Filter Bar -->
-  <div class="card-panel search-bar mb-4">
-    <form method="GET" action="{{ url_for('main.explore') }}" class="row g-2 align-items-end">
-      <div class="col-md-6">
-        <label class="form-label">Cari</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input
-            type="text"
-            class="form-control"
-            name="q"
-            value="{{ search }}"
-            placeholder="Cari judul atau bahasa..."
-          />
-        </div>
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Bahasa</label>
-        <select class="form-select" name="lang">
-          <option value="">Semua Bahasa</option>
-          {% for value, label in languages %}
-            <option value="{{ value }}" {% if language == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="col-md-3 d-flex gap-2">
-        <button type="submit" class="btn btn-primary w-100">
-          <i class="bi bi-funnel me-1"></i>Filter
-        </button>
-        {% if search or language %}
-        <a href="{{ url_for('main.explore') }}" class="btn btn-secondary">
-          <i class="bi bi-x-lg"></i>
-        </a>
-        {% endif %}
-      </div>
-    </form>
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-cell">
+    <div class="stat-n">{{ stats.total }}</div>
+    <div class="stat-l">Total Pastes</div>
   </div>
-
-  <!-- Active Filters -->
-  {% if search or language %}
-  <div class="active-filters mb-3">
-    <span class="filter-label">Filter aktif:</span>
-    {% if search %}
-    <span class="filter-chip">
-      <i class="bi bi-search me-1"></i>"{{ search }}"
-      <a href="{{ url_for('main.explore', lang=language) }}" class="filter-remove"><i class="bi bi-x"></i></a>
-    </span>
-    {% endif %}
-    {% if language %}
-    <span class="filter-chip">
-      <i class="bi bi-code me-1"></i>{{ language }}
-      <a href="{{ url_for('main.explore', q=search) }}" class="filter-remove"><i class="bi bi-x"></i></a>
-    </span>
-    {% endif %}
+  <div class="stat-cell">
+    <div class="stat-n">{{ stats.public }}</div>
+    <div class="stat-l">Publik</div>
   </div>
-  {% endif %}
+</div>
 
-  <!-- Paste Grid -->
-  {% if pastes %}
-  <div class="row g-3 paste-grid">
-    {% for paste in pastes %}
-    <div class="col-md-6 col-xl-4">
-      <a href="{{ url_for('main.view_paste', slug=paste.slug) }}" class="paste-card-link">
-        <div class="paste-card">
-          <div class="paste-card-header">
-            <span class="lang-badge lang-badge-sm">
-              <i class="bi bi-code me-1"></i>{{ paste.language }}
-            </span>
-            <span class="paste-card-time">{{ time_ago(paste.created_at) }}</span>
-          </div>
-          <h3 class="paste-card-title">{{ paste.title or 'Untitled Paste' }}</h3>
-          <div class="paste-card-footer">
-            <span class="paste-card-meta">
-              <i class="bi bi-eye me-1"></i>{{ paste.views }} views
-            </span>
-            <span class="paste-card-meta">
-              <i class="bi bi-link-45deg me-1"></i>{{ paste.slug }}
-            </span>
-          </div>
-        </div>
+<!-- Search Bar -->
+<form method="GET" action="{{ url_for('main.explore') }}" id="searchForm">
+  <div class="search-bar-wrap">
+    <input
+      type="text"
+      class="search-input"
+      name="q"
+      value="{{ search }}"
+      placeholder="// Cari judul atau bahasa..."
+      autocomplete="off"
+    />
+    <select class="filter-select" name="lang" id="langFilter"
+            onchange="document.getElementById('searchForm').submit()">
+      <option value="">Semua Bahasa</option>
+      {% for value, label in languages %}
+        <option value="{{ value }}" {% if language == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-primary" style="padding:7px 16px;font-size:10px;">
+      <i class="bi bi-search"></i> Cari
+    </button>
+    {% if search or language %}
+      <a href="{{ url_for('main.explore') }}" class="btn-secondary" style="padding:7px 12px;font-size:10px;">
+        <i class="bi bi-x"></i> Reset
       </a>
-    </div>
+    {% endif %}
+  </div>
+</form>
+
+<!-- Results -->
+{% if pastes %}
+  <div class="pastes-list">
+    {% for paste in pastes %}
+      <a href="{{ url_for('main.view_paste', slug=paste.slug) }}" class="paste-row">
+        <div class="paste-row-icon">
+          <i class="bi bi-file-code"></i>
+        </div>
+        <div class="paste-row-main">
+          <div class="paste-row-title {% if not paste.title %}untitled{% endif %}">
+            {{ paste.title or '(Untitled Paste)' }}
+          </div>
+          <div class="paste-row-meta">
+            <span class="meta-pill"><i class="bi bi-clock me-1"></i>{{ time_ago(paste.created_at) }}</span>
+            <span class="meta-pill"><i class="bi bi-eye me-1"></i>{{ paste.views }}</span>
+            <span class="meta-pill"><code style="font-size:9px;padding:1px 5px;">{{ paste.slug }}</code></span>
+          </div>
+        </div>
+        <span class="paste-row-lang">{{ paste.language }}</span>
+      </a>
     {% endfor %}
   </div>
 
   <!-- Pagination -->
-  {% if page > 1 or has_next %}
-  <div class="pagination-bar mt-4 d-flex justify-content-center gap-2">
-    {% if page > 1 %}
-    <a href="{{ url_for('main.explore', q=search, lang=language, page=page-1) }}"
-       class="btn btn-secondary">
-      <i class="bi bi-chevron-left me-1"></i>Sebelumnya
-    </a>
-    {% endif %}
-    <span class="btn btn-ghost disabled">Halaman {{ page }}</span>
-    {% if has_next %}
-    <a href="{{ url_for('main.explore', q=search, lang=language, page=page+1) }}"
-       class="btn btn-secondary">
-      Berikutnya<i class="bi bi-chevron-right ms-1"></i>
-    </a>
-    {% endif %}
+  <div class="pagination-row">
+    <span class="page-info">// Halaman {{ page }}</span>
+    <div style="display:flex;gap:8px;">
+      {% if page > 1 %}
+        <a href="{{ url_for('main.explore', page=page-1, q=search, lang=language) }}"
+           class="btn-secondary" style="padding:6px 12px;font-size:10px;">
+          <i class="bi bi-arrow-left"></i> Prev
+        </a>
+      {% endif %}
+      {% if has_next %}
+        <a href="{{ url_for('main.explore', page=page+1, q=search, lang=language) }}"
+           class="btn-secondary" style="padding:6px 12px;font-size:10px;">
+          Next <i class="bi bi-arrow-right"></i>
+        </a>
+      {% endif %}
+    </div>
   </div>
-  {% endif %}
 
-  {% else %}
-  <!-- Empty State -->
+{% else %}
   <div class="empty-state">
     <div class="empty-icon"><i class="bi bi-inbox"></i></div>
-    <h3>Tidak ada paste ditemukan</h3>
-    {% if search or language %}
-    <p>Coba ubah filter atau <a href="{{ url_for('main.explore') }}">hapus filter</a>.</p>
-    {% else %}
-    <p>Jadilah yang pertama berbagi kode!</p>
-    {% endif %}
-    <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">
-      <i class="bi bi-plus-circle me-2"></i>Buat Paste
-    </a>
+    <div class="empty-title">Tidak ada paste ditemukan</div>
+    <div class="empty-sub">
+      {% if search or language %}
+        // Coba ubah filter atau kata kunci pencarian
+      {% else %}
+        // Belum ada paste publik. Jadilah yang pertama!
+      {% endif %}
+    </div>
+    <div style="margin-top:20px;">
+      <a href="{{ url_for('main.index') }}" class="btn-primary" style="display:inline-flex;padding:9px 18px;">
+        <i class="bi bi-plus-square me-2"></i> Buat Paste
+      </a>
+    </div>
   </div>
-  {% endif %}
+{% endif %}
 
-</div>
 {% endblock %}

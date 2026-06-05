@@ -3,56 +3,75 @@
 {% block title %}New Paste — DevPaste{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="row g-4">
 
-    <!-- Main Form -->
-    <div class="col-lg-8">
-      <div class="card-panel">
-        <div class="panel-header">
-          <h1 class="panel-title">
-            <i class="bi bi-file-code me-2 text-accent"></i>Buat Paste Baru
-          </h1>
-          <p class="panel-subtitle">Bagikan kode kamu — atau simpan sebagai unlisted.</p>
+<!-- Header -->
+<div class="page-header" style="padding-top:8px;">
+  <div class="header-eyebrow">
+    <span class="pulse"></span>
+    DevPaste &nbsp;// Code Sharing Platform
+  </div>
+  <h1 class="page-title">
+    Buat <span class="accent">Paste</span> Baru
+  </h1>
+  <div class="header-divider"></div>
+  <p class="page-subtitle">Bagikan snippet kode kamu — public atau unlisted, tersimpan selamanya atau sementara.</p>
+</div>
+
+<div class="row g-4">
+
+  <!-- Main Form -->
+  <div class="col-lg-8">
+    <div class="card-panel">
+
+      <div class="panel-header">
+        <h2 class="panel-title">
+          <i class="bi bi-file-code me-2 text-accent"></i>Editor
+        </h2>
+        <p class="panel-subtitle">// Paste kode kamu di bawah ini</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('main.index') }}" id="pasteForm">
+
+        <!-- Title -->
+        <div class="form-section">
+          <label for="title" class="form-label">
+            Judul &nbsp;<span class="label-optional">(opsional)</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            name="title"
+            placeholder="Paste Tanpa Judul"
+            maxlength="200"
+            value="{{ form_data.get('title', '') }}"
+          />
         </div>
 
-        <form method="POST" action="{{ url_for('main.index') }}" id="pasteForm">
-
-          <!-- Title -->
-          <div class="mb-3">
-            <label for="title" class="form-label">Judul <span class="label-optional">(opsional)</span></label>
-            <input
-              type="text"
-              class="form-control"
-              id="title"
-              name="title"
-              placeholder="Paste Tanpa Judul"
-              maxlength="200"
-              value="{{ form_data.get('title', '') }}"
-            />
+        <!-- Code Content -->
+        <div class="form-section">
+          <div class="d-flex align-items-center justify-content-between mb-3" style="margin-bottom:6px!important;">
+            <label for="content" class="form-label" style="margin-bottom:0;">
+              Kode &nbsp;<span class="label-required">*</span>
+            </label>
+            <span class="char-counter" id="charCounter">0 chars</span>
           </div>
+          <textarea
+            class="form-control code-editor"
+            id="content"
+            name="content"
+            rows="22"
+            placeholder="// Paste kode kamu di sini..."
+            required
+            spellcheck="false"
+            autocomplete="off"
+          >{{ form_data.get('content', '') }}</textarea>
+        </div>
 
-          <!-- Code Content -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label for="content" class="form-label mb-0">Kode <span class="label-required">*</span></label>
-              <span class="char-counter" id="charCounter">0 karakter</span>
-            </div>
-            <textarea
-              class="form-control code-editor"
-              id="content"
-              name="content"
-              rows="20"
-              placeholder="Paste kode kamu di sini..."
-              required
-              spellcheck="false"
-              autocomplete="off"
-            >{{ form_data.get('content', '') }}</textarea>
-          </div>
-
-          <!-- Row: Language + Expiry + Visibility -->
-          <div class="row g-3 mb-4">
-            <div class="col-sm-4">
+        <!-- Options Row -->
+        <div class="form-section">
+          <div class="row" style="margin:0;gap:0;">
+            <div class="col-sm-4" style="padding:0 8px 0 0;">
               <label for="language" class="form-label">Bahasa</label>
               <select class="form-select" id="language" name="language">
                 {% for value, label in languages %}
@@ -63,93 +82,116 @@
                 {% endfor %}
               </select>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-4" style="padding:0 8px;">
               <label for="expiration" class="form-label">Kedaluwarsa</label>
               <select class="form-select" id="expiration" name="expiration">
-                <option value="never" {% if form_data.get('expiration', 'never') == 'never' %}selected{% endif %}>Tidak pernah</option>
-                <option value="1h" {% if form_data.get('expiration') == '1h' %}selected{% endif %}>1 Jam</option>
-                <option value="1d" {% if form_data.get('expiration') == '1d' %}selected{% endif %}>1 Hari</option>
-                <option value="7d" {% if form_data.get('expiration') == '7d' %}selected{% endif %}>7 Hari</option>
-                <option value="30d" {% if form_data.get('expiration') == '30d' %}selected{% endif %}>30 Hari</option>
+                <option value="never"  {% if form_data.get('expiration','never')=='never' %}selected{% endif %}>Tidak pernah</option>
+                <option value="1h"     {% if form_data.get('expiration')=='1h' %}selected{% endif %}>1 Jam</option>
+                <option value="1d"     {% if form_data.get('expiration')=='1d' %}selected{% endif %}>1 Hari</option>
+                <option value="7d"     {% if form_data.get('expiration')=='7d' %}selected{% endif %}>7 Hari</option>
+                <option value="30d"    {% if form_data.get('expiration')=='30d' %}selected{% endif %}>30 Hari</option>
               </select>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-4" style="padding:0 0 0 8px;">
               <label for="visibility" class="form-label">Visibilitas</label>
               <select class="form-select" id="visibility" name="visibility">
-                <option value="public" {% if form_data.get('visibility', 'public') == 'public' %}selected{% endif %}>
-                  🌍 Publik
-                </option>
-                <option value="unlisted" {% if form_data.get('visibility') == 'unlisted' %}selected{% endif %}>
-                  🔗 Unlisted
-                </option>
+                <option value="public"   {% if form_data.get('visibility','public')=='public' %}selected{% endif %}>🌍 Publik</option>
+                <option value="unlisted" {% if form_data.get('visibility')=='unlisted' %}selected{% endif %}>🔗 Unlisted</option>
               </select>
             </div>
           </div>
+        </div>
 
-          <button type="submit" class="btn btn-primary btn-lg w-100 btn-create" id="submitBtn">
+        <!-- Submit -->
+        <div class="form-actions">
+          <button type="submit" class="btn-create btn-lg" id="submitBtn">
             <i class="bi bi-upload me-2"></i>Buat Paste
           </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="col-lg-4">
-
-      <!-- Tips -->
-      <div class="card-panel mb-4">
-        <div class="panel-header pb-2">
-          <h6 class="panel-title-sm"><i class="bi bi-lightbulb me-2 text-accent"></i>Tips Cepat</h6>
         </div>
-        <ul class="tips-list">
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Gunakan <strong>Tab</strong> untuk indentasi</li>
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Paste unlisted tidak muncul di Jelajahi</li>
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Simpan token hapus setelah membuat</li>
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Raw view tersedia di <code>/raw/&lt;slug&gt;</code></li>
-        </ul>
-      </div>
 
-      <!-- Ad Slot -->
-      <div class="ad-slot ad-slot-sidebar">
-        <span class="ad-slot-label">Iklan</span>
-      </div>
-
+      </form>
     </div>
   </div>
+
+  <!-- Sidebar -->
+  <div class="col-lg-4">
+
+    <!-- Tips -->
+    <div class="card-panel mb-4" style="animation-delay:0.1s;">
+      <div class="panel-header">
+        <h3 class="panel-title-sm">
+          <i class="bi bi-terminal me-2 text-accent"></i>Quick Tips
+        </h3>
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <ul class="tips-list" style="padding:0 16px;">
+          <li><i class="bi bi-chevron-right text-accent me-2" style="font-size:10px;"></i>Tekan <code>Tab</code> untuk indentasi 2 spasi</li>
+          <li><i class="bi bi-chevron-right text-accent me-2" style="font-size:10px;"></i>Paste <strong>unlisted</strong> tidak tampil di Jelajahi</li>
+          <li><i class="bi bi-chevron-right text-accent me-2" style="font-size:10px;"></i>Simpan <strong>delete token</strong> setelah membuat</li>
+          <li><i class="bi bi-chevron-right text-accent me-2" style="font-size:10px;"></i>Raw view tersedia di <code>/raw/&lt;slug&gt;</code></li>
+          <li><i class="bi bi-chevron-right text-accent me-2" style="font-size:10px;"></i>Maksimum 100.000 karakter per paste</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Supported Languages -->
+    <div class="card-panel" style="animation-delay:0.2s;">
+      <div class="panel-header">
+        <h3 class="panel-title-sm">
+          <i class="bi bi-code me-2 text-accent"></i>Bahasa Didukung
+        </h3>
+      </div>
+      <div class="panel-body" style="padding:12px 16px;">
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          {% for value, label in languages %}
+            <span style="font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border:1px solid var(--border2);color:var(--muted);">
+              {{ label }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Ad Slot -->
+    <div class="ad-slot ad-slot-sidebar mt-4">
+      <span class="ad-slot-label">// Iklan</span>
+    </div>
+
+  </div>
 </div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Character counter
+  // ── CHAR COUNTER ──
   const content = document.getElementById('content');
   const counter = document.getElementById('charCounter');
 
   function updateCounter() {
     const len = content.value.length;
-    counter.textContent = len.toLocaleString() + ' character' + (len !== 1 ? 's' : '');
+    counter.textContent = len.toLocaleString() + ' chars';
     counter.classList.toggle('counter-warn', len > 50000);
   }
 
   content.addEventListener('input', updateCounter);
   updateCounter();
 
-  // Tab support in textarea
+  // ── TAB SUPPORT ──
   content.addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
       e.preventDefault();
-      const start = this.selectionStart;
-      const end = this.selectionEnd;
-      this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
-      this.selectionStart = this.selectionEnd = start + 2;
+      const s = this.selectionStart, end = this.selectionEnd;
+      this.value = this.value.substring(0, s) + '  ' + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = s + 2;
       updateCounter();
     }
   });
 
-  // Loading state on submit
+  // ── LOADING STATE ──
   document.getElementById('pasteForm').addEventListener('submit', function() {
     const btn = document.getElementById('submitBtn');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Membuat...';
     btn.disabled = true;
   });
 </script>

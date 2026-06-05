@@ -1,28 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}404 — Paste Not Found — DevPaste{% endblock %}
+{% block title %}404 — DevPaste{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="error-page text-center">
-    <div class="error-code">404</div>
-    <div class="error-icon"><i class="bi bi-file-earmark-x"></i></div>
-    <h1 class="error-title">Paste Not Found</h1>
-    <p class="error-message">
-      {% if message is defined %}
-        {{ message }}
-      {% else %}
-        The paste you're looking for doesn't exist, has been deleted, or the link is invalid.
-      {% endif %}
-    </p>
-    <div class="d-flex gap-3 justify-content-center mt-4">
-      <a href="{{ url_for('main.index') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-2"></i>New Paste
-      </a>
-      <a href="{{ url_for('main.explore') }}" class="btn btn-secondary">
-        <i class="bi bi-compass me-2"></i>Explore
-      </a>
-    </div>
+<div class="error-page">
+  <div class="error-code">404</div>
+  <div class="error-title">{{ message or 'Paste Tidak Ditemukan' }}</div>
+  <div class="error-sub">// Paste ini tidak ada atau sudah kedaluwarsa</div>
+  <div style="margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <a href="{{ url_for('main.index') }}" class="btn-primary" style="padding:10px 20px;">
+      <i class="bi bi-plus-square me-2"></i>Buat Paste Baru
+    </a>
+    <a href="{{ url_for('main.explore') }}" class="btn-secondary" style="padding:10px 20px;">
+      <i class="bi bi-compass me-2"></i>Jelajahi
+    </a>
   </div>
 </div>
 {% endblock %}

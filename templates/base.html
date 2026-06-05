@@ -8,9 +8,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
@@ -19,83 +18,110 @@
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg" id="main-nav">
-    <div class="container">
-      <a class="navbar-brand" href="{{ url_for('main.index') }}">
-        <span class="brand-icon"><i class="bi bi-code-slash"></i></span>
-        <span class="brand-text">Dev<span class="brand-accent">Paste</span></span>
-        <span class="brand-tagline">Bagikan kode. Seketika.</span>
-      </a>
+<div class="scanline"></div>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-        <span class="navbar-toggler-icon"></span>
+<!-- ── NAVBAR ── -->
+<nav id="main-nav">
+  <div class="container" style="max-width:1200px;margin:0 auto;padding:0 20px;">
+    <a class="navbar-brand" href="{{ url_for('main.index') }}">
+      <span class="brand-icon"><i class="bi bi-code-slash"></i></span>
+      <span class="brand-text">Dev<span class="brand-accent">Paste</span></span>
+      <span class="brand-tagline">// Bagikan kode</span>
+    </a>
+
+    <button class="navbar-toggler" id="navToggler" aria-label="Toggle nav">
+      <i class="bi bi-list" style="font-size:18px;color:var(--text2);"></i>
+    </button>
+
+    <div class="navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+             href="{{ url_for('main.index') }}">
+            <i class="bi bi-plus-square"></i>Buat
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'main.explore' %}active{% endif %}"
+             href="{{ url_for('main.explore') }}">
+            <i class="bi bi-compass"></i>Jelajahi
+          </a>
+        </li>
+      </ul>
+      <button class="theme-toggle" id="themeToggle" title="Ganti tema">
+        <i class="bi bi-sun-fill" id="themeIcon"></i>
       </button>
-
-      <div class="collapse navbar-collapse" id="navbarContent">
-        <ul class="navbar-nav ms-auto align-items-center gap-1">
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
-              <i class="bi bi-plus-circle me-1"></i>Buat Paste
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.endpoint == 'main.explore' %}active{% endif %}" href="{{ url_for('main.explore') }}">
-              <i class="bi bi-compass me-1"></i>Jelajahi
-            </a>
-          </li>
-          <li class="nav-item ms-2">
-            <button class="btn btn-sm theme-toggle" id="themeToggle" title="Ganti tema">
-              <i class="bi bi-sun-fill" id="themeIcon"></i>
-            </button>
-          </li>
-        </ul>
-      </div>
     </div>
-  </nav>
+  </div>
+</nav>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999;">
-        {% for category, message in messages %}
-          <div class="toast show align-items-center toast-{{ category }}" role="alert">
-            <div class="d-flex">
-              <div class="toast-body">
-                <i class="bi {% if category == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-triangle-fill text-danger{% endif %} me-2"></i>
-                {{ message }}
-              </div>
-              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999;position:fixed;top:60px;right:16px;">
+      {% for category, message in messages %}
+        <div class="toast show align-items-center toast-{{ category }}" role="alert"
+             style="margin-bottom:8px;">
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="bi {% if category == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-triangle-fill text-danger{% endif %} me-2"></i>
+              {{ message }}
             </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
           </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
-  <main class="main-content">
+<main class="main-content">
+  <div style="max-width:1200px;margin:0 auto;padding:0 20px;">
     {% block content %}{% endblock %}
-  </main>
+  </div>
+</main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <i class="bi bi-code-slash me-1"></i>
-          <strong>DevPaste</strong> — Platform Berbagi Kode
-        </div>
-        <div class="footer-copy">
-          &copy; {{ 2025 }} DevPaste. Dibuat untuk developer.
-        </div>
+<footer class="site-footer">
+  <div style="max-width:1200px;margin:0 auto;padding:0 20px;">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <i class="bi bi-code-slash"></i>
+        Dev<span style="color:var(--text2);font-weight:400;">Paste</span>
+      </div>
+      <div class="footer-copy">
+        &copy; {{ 2026 }} DevPaste &nbsp;·&nbsp; Platform Berbagi Kode
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
 
-  <div id="jsToast" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;"></div>
+<div id="jsToast" style="position:fixed;bottom:20px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<!-- Delete Modal -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9998;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:var(--bg2);border:1px solid var(--red);border-top:3px solid var(--red);padding:28px 32px;max-width:400px;width:90%;animation:fadeSlideUp 0.3s ease;">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:12px;">
+      <i class="bi bi-exclamation-triangle me-2"></i>Konfirmasi Hapus
+    </div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:20px;font-family:var(--sans);">
+      Paste ini akan dihapus permanen dan tidak bisa dipulihkan.
+    </div>
+    <form method="POST" action="{{ request.path.replace('/paste/', '/delete/') }}" id="deleteForm">
+      <input type="hidden" name="delete_token" value="{{ request.args.get('token', '') }}" />
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn-danger" style="flex:1;justify-content:center;">
+          <i class="bi bi-trash3"></i> Hapus Paste
+        </button>
+        <button type="button" class="btn-secondary" id="cancelDelete" style="flex:1;justify-content:center;">
+          Batal
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
-  {% block scripts %}{% endblock %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>
