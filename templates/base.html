@@ -1,114 +1,94 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}DevPaste — Bagikan Kode Seketika{% endblock %}</title>
-  <meta name="description" content="DevPaste — Bagikan snippet kode dengan syntax highlighting. Alternatif Pastebin profesional." />
+  <meta name="description" content="DevPaste — Bagikan snippet kode dengan syntax highlighting." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 
   {% block head %}{% endblock %}
 </head>
 <body>
 
-  <!-- Titlebar VSCode style -->
-  <div class="vsc-titlebar">
-    <div class="vsc-titlebar-dots">
-      <span class="dot dot-red"></span>
-      <span class="dot dot-yellow"></span>
-      <span class="dot dot-green"></span>
-    </div>
-    <div class="vsc-titlebar-title">
-      <i class="bi bi-code-slash me-1"></i>DevPaste — editor
-    </div>
-    <div class="vsc-titlebar-actions">
-      <button class="theme-toggle" id="themeToggle" title="Ganti tema">
-        <i class="bi bi-sun-fill" id="themeIcon"></i>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg" id="main-nav">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('main.index') }}">
+        <span class="brand-icon"><i class="bi bi-code-slash"></i></span>
+        <span class="brand-text">Dev<span class="brand-accent">Paste</span></span>
+        <span class="brand-tagline">Bagikan kode. Seketika.</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
       </button>
-    </div>
-  </div>
 
-  <!-- Activity Bar + Sidebar + Main -->
-  <div class="vsc-layout">
-
-    <!-- Activity Bar -->
-    <div class="vsc-activitybar">
-      <a href="{{ url_for('main.index') }}" class="act-icon {% if request.endpoint == 'main.index' %}active{% endif %}" title="Buat Paste Baru">
-        <i class="bi bi-file-code"></i>
-      </a>
-      <a href="{{ url_for('main.explore') }}" class="act-icon {% if request.endpoint == 'main.explore' %}active{% endif %}" title="Jelajahi">
-        <i class="bi bi-folder-open"></i>
-      </a>
-      <div class="act-spacer"></div>
-      <div class="act-icon" title="DevPaste v1.0">
-        <i class="bi bi-gear"></i>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav ms-auto align-items-center gap-1">
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}" href="{{ url_for('main.index') }}">
+              <i class="bi bi-plus-circle me-1"></i>Buat Paste
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'main.explore' %}active{% endif %}" href="{{ url_for('main.explore') }}">
+              <i class="bi bi-compass me-1"></i>Jelajahi
+            </a>
+          </li>
+          <li class="nav-item ms-2">
+            <button class="btn btn-sm theme-toggle" id="themeToggle" title="Ganti tema">
+              <i class="bi bi-sun-fill" id="themeIcon"></i>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
+  </nav>
 
-    <!-- Main Editor Area -->
-    <div class="vsc-main">
-
-      <!-- Tab Bar -->
-      <div class="vsc-tabbar">
-        {% if request.endpoint == 'main.index' %}
-        <div class="vsc-tab active"><i class="bi bi-file-code me-1 text-accent"></i>buat-paste.py</div>
-        {% elif request.endpoint == 'main.explore' %}
-        <div class="vsc-tab active"><i class="bi bi-folder me-1 text-warning"></i>jelajahi.py</div>
-        {% elif request.endpoint == 'main.view_paste' %}
-        <div class="vsc-tab active"><i class="bi bi-file-text me-1 text-info"></i>lihat-paste.py</div>
-        {% else %}
-        <div class="vsc-tab active"><i class="bi bi-file me-1"></i>halaman.py</div>
-        {% endif %}
-        <div class="vsc-tab-filler"></div>
-      </div>
-
-      <!-- Flash Messages -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999;">
-            {% for category, message in messages %}
-              <div class="toast show align-items-center toast-{{ category }}" role="alert">
-                <div class="d-flex">
-                  <div class="toast-body">
-                    <i class="bi {% if category == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-triangle-fill text-danger{% endif %} me-2"></i>
-                    {{ message }}
-                  </div>
-                  <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999;">
+        {% for category, message in messages %}
+          <div class="toast show align-items-center toast-{{ category }}" role="alert">
+            <div class="d-flex">
+              <div class="toast-body">
+                <i class="bi {% if category == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-triangle-fill text-danger{% endif %} me-2"></i>
+                {{ message }}
               </div>
-            {% endfor %}
+              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
           </div>
-        {% endif %}
-      {% endwith %}
-
-      <!-- Editor Content -->
-      <div class="vsc-editor-content">
-        {% block content %}{% endblock %}
+        {% endfor %}
       </div>
+    {% endif %}
+  {% endwith %}
 
-      <!-- Status Bar -->
-      <div class="vsc-statusbar">
-        <div class="status-left">
-          <span class="status-item status-branch"><i class="bi bi-git me-1"></i>master</span>
-          <span class="status-item"><i class="bi bi-check-circle me-1"></i>0 masalah</span>
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <i class="bi bi-code-slash me-1"></i>
+          <strong>DevPaste</strong> — Platform Berbagi Kode
         </div>
-        <div class="status-right">
-          <span class="status-item">UTF-8</span>
-          <span class="status-item">WIB</span>
-          <span class="status-item">DevPaste v1.0</span>
+        <div class="footer-copy">
+          &copy; {{ 2025 }} DevPaste. Dibuat untuk developer.
         </div>
       </div>
-
     </div>
-  </div>
+  </footer>
 
   <div id="jsToast" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;"></div>
 

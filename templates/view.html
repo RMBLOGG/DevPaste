@@ -3,145 +3,164 @@
 {% block title %}{{ paste.title or 'Paste Tanpa Judul' }} — DevPaste{% endblock %}
 
 {% block content %}
-<div class="editor-pane">
-  <div class="editor-split">
+<div class="container py-4">
+  <div class="row g-4">
 
-    <!-- Main code view -->
-    <div class="editor-form-area">
+    <!-- Main Content -->
+    <div class="col-lg-8">
 
-      <!-- Breadcrumb -->
-      <div class="editor-breadcrumb">
-        <span class="bc-item">devpaste</span>
-        <i class="bi bi-chevron-right bc-sep"></i>
-        <span class="bc-item">paste</span>
-        <i class="bi bi-chevron-right bc-sep"></i>
-        <span class="bc-item active">{{ paste.slug }}</span>
-      </div>
-
-      <!-- Paste meta -->
-      <div class="paste-meta-bar">
-        <div class="paste-meta-left">
-          <h1 class="paste-view-title">{{ paste.title or 'Paste Tanpa Judul' }}</h1>
-          <div class="paste-badges">
-            <span class="badge-lang"><i class="bi bi-code me-1"></i>{{ paste.language }}</span>
-            <span class="badge-meta"><i class="bi bi-clock me-1"></i>{{ time_ago(paste.created_at) }}</span>
-            <span class="badge-meta"><i class="bi bi-eye me-1"></i>{{ paste.views }} kali dilihat</span>
-            {% if paste.visibility == 'unlisted' %}
-            <span class="badge-meta badge-unlisted"><i class="bi bi-lock me-1"></i>Unlisted</span>
-            {% else %}
-            <span class="badge-meta badge-public"><i class="bi bi-globe me-1"></i>Publik</span>
-            {% endif %}
-            {% if paste.expires_at %}
-            <span class="badge-meta badge-expiry"><i class="bi bi-hourglass me-1"></i>Kedaluwarsa {{ time_ago(paste.expires_at) }}</span>
-            {% endif %}
-          </div>
-        </div>
-        <div class="paste-actions-bar">
-          <button class="btn-vsc-action" id="copyBtn" onclick="copyPaste()">
-            <i class="bi bi-clipboard me-1"></i>Salin
-          </button>
-          <a class="btn-vsc-action" href="{{ url_for('main.raw_paste', slug=paste.slug) }}" target="_blank">
-            <i class="bi bi-file-text me-1"></i>Raw
-          </a>
-          {% if delete_token %}
-          <button class="btn-vsc-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-            <i class="bi bi-trash me-1"></i>Hapus
-          </button>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Code Block VSCode style -->
-      <div class="vsc-code-block">
-        <div class="vsc-code-header">
-          <div class="vsc-code-tabs">
-            <div class="vsc-code-tab active">
-              <i class="bi bi-file-code me-1"></i>{{ paste.slug }}.{{ paste.language }}
-              <span class="tab-close">×</span>
+      <!-- Paste Header -->
+      <div class="paste-header card-panel mb-3">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
+          <div class="paste-meta">
+            <h1 class="paste-title">{{ paste.title or 'Paste Tanpa Judul' }}</h1>
+            <div class="paste-info d-flex flex-wrap gap-2 align-items-center mt-2">
+              <span class="lang-badge"><i class="bi bi-code me-1"></i>{{ paste.language }}</span>
+              <span class="meta-item"><i class="bi bi-clock me-1"></i>{{ time_ago(paste.created_at) }}</span>
+              <span class="meta-item"><i class="bi bi-eye me-1"></i>{{ paste.views }} kali dilihat</span>
+              {% if paste.visibility == 'unlisted' %}
+              <span class="meta-item unlisted-badge"><i class="bi bi-lock me-1"></i>Unlisted</span>
+              {% else %}
+              <span class="meta-item public-badge"><i class="bi bi-globe me-1"></i>Publik</span>
+              {% endif %}
+              {% if paste.expires_at %}
+              <span class="meta-item expiry-badge"><i class="bi bi-hourglass me-1"></i>Kedaluwarsa {{ time_ago(paste.expires_at) }}</span>
+              {% endif %}
             </div>
           </div>
-          <div class="vsc-code-actions">
-            <button class="code-action-btn" onclick="copyPaste()" title="Salin kode">
+          <div class="paste-actions d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm btn-action" id="copyBtn" onclick="copyPaste()">
+              <i class="bi bi-clipboard me-1"></i>Salin
+            </button>
+            <a class="btn btn-sm btn-action" href="{{ url_for('main.raw_paste', slug=paste.slug) }}" target="_blank">
+              <i class="bi bi-file-text me-1"></i>Raw
+            </a>
+            {% if delete_token %}
+            <button class="btn btn-sm btn-danger-action" data-bs-toggle="modal" data-bs-target="#deleteModal">
+              <i class="bi bi-trash me-1"></i>Hapus
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- VSCode Terminal Code Block -->
+      <div class="vsc-window mb-3">
+        <!-- Window titlebar -->
+        <div class="vsc-titlebar">
+          <div class="vsc-dots">
+            <span class="vsc-dot dot-red"></span>
+            <span class="vsc-dot dot-yellow"></span>
+            <span class="vsc-dot dot-green"></span>
+          </div>
+          <div class="vsc-tabs">
+            <div class="vsc-tab active">
+              <i class="bi bi-file-code me-1"></i>{{ paste.slug }}.{{ paste.language }}
+            </div>
+          </div>
+          <div class="vsc-toolbar">
+            <button class="vsc-tool-btn" onclick="copyPaste()" title="Salin kode">
               <i class="bi bi-clipboard" id="codeClipIcon"></i>
             </button>
           </div>
         </div>
-        <div class="vsc-code-body">
-          <div class="line-numbers" id="lineNumbers"></div>
-          <div class="code-scroll-area">
+        <!-- Editor body with line numbers -->
+        <div class="vsc-body">
+          <div class="vsc-line-numbers" id="lineNumbers"></div>
+          <div class="vsc-scroll">
             <pre class="vsc-pre"><code class="language-{{ paste.language }}" id="codeContent">{{ paste.content | e }}</code></pre>
+          </div>
+        </div>
+        <!-- Status bar -->
+        <div class="vsc-statusbar">
+          <div class="vsc-status-left">
+            <span class="vsc-status-item"><i class="bi bi-git me-1"></i>master</span>
+            <span class="vsc-status-item">{{ paste.language }}</span>
+          </div>
+          <div class="vsc-status-right">
+            <span class="vsc-status-item">UTF-8</span>
+            <span class="vsc-status-item">{{ paste.content | length }} karakter</span>
           </div>
         </div>
       </div>
 
       <!-- Delete Token Notice -->
       {% if delete_token %}
-      <div class="token-notice mt-3">
-        <div class="token-notice-header">
-          <i class="bi bi-key-fill me-2"></i><strong>Simpan token hapus kamu:</strong>
-        </div>
-        <div class="token-notice-body">
-          <code class="token-code">{{ delete_token }}</code>
-          <button class="btn-copy-token" onclick="copyToken('{{ delete_token }}')" title="Salin token">
-            <i class="bi bi-clipboard"></i>
-          </button>
-        </div>
-        <p class="token-warn">⚠ Token ini tidak akan ditampilkan lagi. Simpan sekarang jika ingin menghapus paste ini.</p>
+      <div class="delete-token-notice mt-3">
+        <i class="bi bi-key-fill me-2 text-warning"></i>
+        <strong>Simpan token hapus kamu:</strong>
+        <code class="token-display">{{ delete_token }}</code>
+        <button class="btn-copy-token" onclick="copyToken('{{ delete_token }}')" title="Salin token">
+          <i class="bi bi-clipboard"></i>
+        </button>
+        <p class="token-warning">Token ini tidak akan ditampilkan lagi. Kamu butuh ini untuk menghapus paste.</p>
       </div>
       {% endif %}
+
+      <!-- Ad Slot -->
+      <div class="ad-slot ad-slot-below-content mt-4">
+        <span class="ad-slot-label">Iklan</span>
+      </div>
 
     </div>
 
     <!-- Sidebar -->
-    <div class="editor-sidebar-panel">
+    <div class="col-lg-4">
 
       <!-- Paste Details -->
-      <div class="panel-section">
-        <div class="panel-section-title"><i class="bi bi-info-circle me-1"></i>DETAIL PASTE</div>
-        <div class="detail-list">
+      <div class="card-panel mb-4">
+        <h6 class="panel-title-sm mb-3"><i class="bi bi-info-circle me-2 text-accent"></i>Detail Paste</h6>
+        <div class="details-list">
           <div class="detail-row">
-            <span class="detail-key">Slug</span>
-            <code class="detail-val">{{ paste.slug }}</code>
+            <span class="detail-label">Slug</span>
+            <span class="detail-value"><code>{{ paste.slug }}</code></span>
           </div>
           <div class="detail-row">
-            <span class="detail-key">Dibuat</span>
-            <span class="detail-val">{{ format_datetime(paste.created_at) }}</span>
+            <span class="detail-label">Dibuat</span>
+            <span class="detail-value">{{ format_datetime(paste.created_at) }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-key">Bahasa</span>
-            <span class="detail-val">{{ paste.language }}</span>
+            <span class="detail-label">Bahasa</span>
+            <span class="detail-value">{{ paste.language }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-key">Visibilitas</span>
-            <span class="detail-val">{{ 'Publik' if paste.visibility == 'public' else 'Unlisted' }}</span>
+            <span class="detail-label">Visibilitas</span>
+            <span class="detail-value">{{ 'Publik' if paste.visibility == 'public' else 'Unlisted' }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-key">Kedaluwarsa</span>
-            <span class="detail-val">{{ format_datetime(paste.expires_at) if paste.expires_at else 'Tidak pernah' }}</span>
+            <span class="detail-label">Kedaluwarsa</span>
+            <span class="detail-value">{{ format_datetime(paste.expires_at) if paste.expires_at else 'Tidak pernah' }}</span>
           </div>
           <div class="detail-row">
-            <span class="detail-key">Dilihat</span>
-            <span class="detail-val">{{ paste.views }}×</span>
+            <span class="detail-label">Dilihat</span>
+            <span class="detail-value">{{ paste.views }}×</span>
           </div>
           <div class="detail-row">
-            <span class="detail-key">Ukuran</span>
-            <span class="detail-val">{{ paste.content | length }} karakter</span>
+            <span class="detail-label">Ukuran</span>
+            <span class="detail-value">{{ paste.content | length }} karakter</span>
           </div>
         </div>
       </div>
 
       <!-- Share -->
-      <div class="panel-section mt-3">
-        <div class="panel-section-title"><i class="bi bi-share me-1"></i>BAGIKAN</div>
-        <input type="text" class="vsc-input vsc-input-sm" id="shareUrl"
-          value="{{ request.url.split('?')[0] }}" readonly />
-        <button class="btn-vsc-action w-100 mt-2" onclick="copyShareUrl()">
-          <i class="bi bi-link-45deg me-1"></i>Salin Link
-        </button>
+      <div class="card-panel mb-4">
+        <h6 class="panel-title-sm mb-3"><i class="bi bi-share me-2 text-accent"></i>Bagikan</h6>
+        <div class="share-url-box">
+          <input type="text" class="form-control form-control-sm" id="shareUrl"
+            value="{{ request.url.split('?')[0] }}" readonly />
+          <button class="btn btn-sm btn-action mt-2 w-100" onclick="copyShareUrl()">
+            <i class="bi bi-link-45deg me-1"></i>Salin Link
+          </button>
+        </div>
         <a href="{{ url_for('main.raw_paste', slug=paste.slug) }}"
-           class="btn-vsc-outline w-100 mt-2" target="_blank">
+           class="btn btn-sm btn-outline-secondary w-100 mt-2" target="_blank">
           <i class="bi bi-file-text me-1"></i>Lihat Raw
         </a>
+      </div>
+
+      <!-- Ad Slot -->
+      <div class="ad-slot ad-slot-sidebar">
+        <span class="ad-slot-label">Iklan</span>
       </div>
 
     </div>
@@ -151,7 +170,7 @@
 <!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content vsc-modal">
+    <div class="modal-content modal-dark">
       <div class="modal-header border-0">
         <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Hapus Paste</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -160,10 +179,10 @@
         <p>Yakin ingin menghapus paste ini? <strong>Tindakan ini tidak bisa dibatalkan.</strong></p>
       </div>
       <div class="modal-footer border-0">
-        <button type="button" class="btn-vsc-action" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
         <form method="POST" action="{{ url_for('main.delete_paste_route', slug=paste.slug) }}" style="display:inline;">
           <input type="hidden" name="delete_token" value="{{ delete_token }}" />
-          <button type="submit" class="btn-vsc-danger">
+          <button type="submit" class="btn btn-danger">
             <i class="bi bi-trash me-1"></i>Ya, Hapus
           </button>
         </form>
@@ -181,6 +200,8 @@
 
     // Generate line numbers
     const lines = codeEl.innerText.split('\n');
+    // Remove trailing empty line
+    if (lines[lines.length - 1] === '') lines.pop();
     const ln = document.getElementById('lineNumbers');
     if (ln) {
       ln.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
