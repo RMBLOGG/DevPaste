@@ -1,140 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}New Paste — DevPaste{% endblock %}
+{% block title %}Paste Baru — DevPaste{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="row g-4">
+<div class="editor-pane">
 
-    <!-- Main Form -->
-    <div class="col-lg-8">
-      <div class="card-panel">
-        <div class="panel-header">
-          <h1 class="panel-title">
-            <i class="bi bi-file-code me-2 text-accent"></i>Create New Paste
-          </h1>
-          <p class="panel-subtitle">Share your code with the world — or keep it unlisted.</p>
+  <!-- Line numbers + editor split -->
+  <div class="editor-split">
+
+    <!-- Left: form -->
+    <div class="editor-form-area">
+
+      <!-- Breadcrumb -->
+      <div class="editor-breadcrumb">
+        <span class="bc-item">devpaste</span>
+        <i class="bi bi-chevron-right bc-sep"></i>
+        <span class="bc-item active">buat-paste.py</span>
+      </div>
+
+      <form method="POST" action="{{ url_for('main.index') }}" id="pasteForm">
+
+        <!-- Comment header -->
+        <div class="code-comment mb-3">
+          <span class="cmt-line"><span class="cmt-hash">#</span> Buat Paste Baru</span>
+          <span class="cmt-line"><span class="cmt-hash">#</span> Bagikan kode kamu ke dunia — atau simpan sebagai unlisted.</span>
         </div>
 
-        <form method="POST" action="{{ url_for('main.index') }}" id="pasteForm">
+        <!-- Title -->
+        <div class="form-group-vsc mb-3">
+          <div class="vsc-label"><span class="kw-blue">const</span> <span class="kw-yellow">judul</span> <span class="kw-white">=</span></div>
+          <input type="text" class="vsc-input" id="title" name="title"
+            placeholder='"Untitled Paste"'
+            maxlength="200" value="{{ form_data.get('title', '') }}" />
+        </div>
 
-          <!-- Title -->
-          <div class="mb-3">
-            <label for="title" class="form-label">Title <span class="label-optional">(optional)</span></label>
-            <input
-              type="text"
-              class="form-control"
-              id="title"
-              name="title"
-              placeholder="Untitled Paste"
-              maxlength="200"
-              value="{{ form_data.get('title', '') }}"
-            />
+        <!-- Content -->
+        <div class="form-group-vsc mb-3">
+          <div class="vsc-label d-flex justify-content-between align-items-center">
+            <span><span class="kw-blue">const</span> <span class="kw-yellow">kode</span> <span class="kw-white">=</span> <span class="kw-red">*wajib</span></span>
+            <span class="char-counter" id="charCounter">0 karakter</span>
           </div>
+          <textarea class="vsc-textarea" id="content" name="content"
+            rows="18" placeholder="// Paste kode kamu di sini..."
+            required spellcheck="false" autocomplete="off">{{ form_data.get('content', '') }}</textarea>
+        </div>
 
-          <!-- Code Content -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label for="content" class="form-label mb-0">Code <span class="label-required">*</span></label>
-              <span class="char-counter" id="charCounter">0 characters</span>
-            </div>
-            <textarea
-              class="form-control code-editor"
-              id="content"
-              name="content"
-              rows="20"
-              placeholder="Paste your code here..."
-              required
-              spellcheck="false"
-              autocomplete="off"
-            >{{ form_data.get('content', '') }}</textarea>
+        <!-- Options row -->
+        <div class="row g-2 mb-4">
+          <div class="col-sm-4">
+            <div class="vsc-label"><span class="kw-blue">let</span> <span class="kw-yellow">bahasa</span></div>
+            <select class="vsc-select" id="language" name="language">
+              {% for value, label in languages %}
+                <option value="{{ value }}" {% if form_data.get('language', 'plaintext') == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
           </div>
-
-          <!-- Row: Language + Expiry + Visibility -->
-          <div class="row g-3 mb-4">
-            <div class="col-sm-4">
-              <label for="language" class="form-label">Language</label>
-              <select class="form-select" id="language" name="language">
-                {% for value, label in languages %}
-                  <option value="{{ value }}"
-                    {% if form_data.get('language', 'plaintext') == value %}selected{% endif %}>
-                    {{ label }}
-                  </option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-sm-4">
-              <label for="expiration" class="form-label">Expiration</label>
-              <select class="form-select" id="expiration" name="expiration">
-                <option value="never" {% if form_data.get('expiration', 'never') == 'never' %}selected{% endif %}>Never</option>
-                <option value="1h" {% if form_data.get('expiration') == '1h' %}selected{% endif %}>1 Hour</option>
-                <option value="1d" {% if form_data.get('expiration') == '1d' %}selected{% endif %}>1 Day</option>
-                <option value="7d" {% if form_data.get('expiration') == '7d' %}selected{% endif %}>7 Days</option>
-                <option value="30d" {% if form_data.get('expiration') == '30d' %}selected{% endif %}>30 Days</option>
-              </select>
-            </div>
-            <div class="col-sm-4">
-              <label for="visibility" class="form-label">Visibility</label>
-              <select class="form-select" id="visibility" name="visibility">
-                <option value="public" {% if form_data.get('visibility', 'public') == 'public' %}selected{% endif %}>
-                  🌍 Public
-                </option>
-                <option value="unlisted" {% if form_data.get('visibility') == 'unlisted' %}selected{% endif %}>
-                  🔗 Unlisted
-                </option>
-              </select>
-            </div>
+          <div class="col-sm-4">
+            <div class="vsc-label"><span class="kw-blue">let</span> <span class="kw-yellow">kedaluwarsa</span></div>
+            <select class="vsc-select" id="expiration" name="expiration">
+              <option value="never" {% if form_data.get('expiration', 'never') == 'never' %}selected{% endif %}>Tidak pernah</option>
+              <option value="1h" {% if form_data.get('expiration') == '1h' %}selected{% endif %}>1 Jam</option>
+              <option value="1d" {% if form_data.get('expiration') == '1d' %}selected{% endif %}>1 Hari</option>
+              <option value="7d" {% if form_data.get('expiration') == '7d' %}selected{% endif %}>7 Hari</option>
+              <option value="30d" {% if form_data.get('expiration') == '30d' %}selected{% endif %}>30 Hari</option>
+            </select>
           </div>
+          <div class="col-sm-4">
+            <div class="vsc-label"><span class="kw-blue">let</span> <span class="kw-yellow">visibilitas</span></div>
+            <select class="vsc-select" id="visibility" name="visibility">
+              <option value="public" {% if form_data.get('visibility', 'public') == 'public' %}selected{% endif %}>🌍 Publik</option>
+              <option value="unlisted" {% if form_data.get('visibility') == 'unlisted' %}selected{% endif %}>🔗 Unlisted</option>
+            </select>
+          </div>
+        </div>
 
-          <button type="submit" class="btn btn-primary btn-lg w-100 btn-create" id="submitBtn">
-            <i class="bi bi-upload me-2"></i>Create Paste
-          </button>
-        </form>
-      </div>
+        <button type="submit" class="btn-vsc-primary w-100" id="submitBtn">
+          <i class="bi bi-play-fill me-2"></i>Jalankan — Buat Paste
+        </button>
+
+      </form>
     </div>
 
-    <!-- Sidebar -->
-    <div class="col-lg-4">
-
-      <!-- Tips -->
-      <div class="card-panel mb-4">
-        <div class="panel-header pb-2">
-          <h6 class="panel-title-sm"><i class="bi bi-lightbulb me-2 text-accent"></i>Quick Tips</h6>
-        </div>
-        <ul class="tips-list">
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Use <strong>Tab</strong> for indentation in the editor</li>
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Unlisted pastes won't appear in Explore</li>
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Save your delete token after creating</li>
-          <li><i class="bi bi-check2-circle text-success me-2"></i>Raw view available at <code>/raw/&lt;slug&gt;</code></li>
+    <!-- Right: sidebar panel -->
+    <div class="editor-sidebar-panel">
+      <div class="panel-section">
+        <div class="panel-section-title"><i class="bi bi-terminal me-1"></i>TIPS</div>
+        <ul class="panel-tips">
+          <li><span class="tip-key">Tab</span> untuk indentasi di editor</li>
+          <li><span class="tip-key">Unlisted</span> tidak muncul di Jelajahi</li>
+          <li>Simpan token hapus setelah membuat</li>
+          <li>Raw view: <span class="tip-key">/raw/slug</span></li>
         </ul>
       </div>
-
-      <!-- Ad Slot -->
-      <div class="ad-slot ad-slot-sidebar">
-        <span class="ad-slot-label">Advertisement</span>
+      <div class="panel-section mt-3">
+        <div class="panel-section-title"><i class="bi bi-info-circle me-1"></i>TENTANG</div>
+        <p class="panel-desc">DevPaste adalah platform berbagi kode gratis dengan syntax highlighting untuk developer.</p>
       </div>
-
     </div>
+
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Character counter
   const content = document.getElementById('content');
   const counter = document.getElementById('charCounter');
 
   function updateCounter() {
     const len = content.value.length;
-    counter.textContent = len.toLocaleString() + ' character' + (len !== 1 ? 's' : '');
+    counter.textContent = len.toLocaleString('id-ID') + ' karakter';
     counter.classList.toggle('counter-warn', len > 50000);
   }
 
   content.addEventListener('input', updateCounter);
   updateCounter();
 
-  // Tab support in textarea
   content.addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -146,10 +127,9 @@
     }
   });
 
-  // Loading state on submit
   document.getElementById('pasteForm').addEventListener('submit', function() {
     const btn = document.getElementById('submitBtn');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
     btn.disabled = true;
   });
 </script>
