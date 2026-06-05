@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Pastes — DevPaste{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Page Header -->
+  <div class="explore-header mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h1 class="explore-title"><i class="bi bi-compass me-2 text-accent"></i>Explore</h1>
+        <p class="explore-subtitle">Browse public code snippets from the community.</p>
+      </div>
+      <div class="explore-stats d-flex gap-3">
+        <div class="stat-chip">
+          <span class="stat-value">{{ stats.total }}</span>
+          <span class="stat-label">Total Pastes</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-value">{{ stats.public }}</span>
+          <span class="stat-label">Public</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card-panel search-bar mb-4">
+    <form method="GET" action="{{ url_for('main.explore') }}" class="row g-2 align-items-end">
+      <div class="col-md-6">
+        <label class="form-label">Search</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            class="form-control"
+            name="q"
+            value="{{ search }}"
+            placeholder="Search by title or language..."
+          />
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Language</label>
+        <select class="form-select" name="lang">
+          <option value="">All Languages</option>
+          {% for value, label in languages %}
+            <option value="{{ value }}" {% if language == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-funnel me-1"></i>Filter
+        </button>
+        {% if search or language %}
+        <a href="{{ url_for('main.explore') }}" class="btn btn-secondary">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Active Filters -->
+  {% if search or language %}
+  <div class="active-filters mb-3">
+    <span class="filter-label">Filtering by:</span>
+    {% if search %}
+    <span class="filter-chip">
+      <i class="bi bi-search me-1"></i>"{{ search }}"
+      <a href="{{ url_for('main.explore', lang=language) }}" class="filter-remove"><i class="bi bi-x"></i></a>
+    </span>
+    {% endif %}
+    {% if language %}
+    <span class="filter-chip">
+      <i class="bi bi-code me-1"></i>{{ language }}
+      <a href="{{ url_for('main.explore', q=search) }}" class="filter-remove"><i class="bi bi-x"></i></a>
+    </span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Paste Grid -->
+  {% if pastes %}
+  <div class="row g-3 paste-grid">
+    {% for paste in pastes %}
+    <div class="col-md-6 col-xl-4">
+      <a href="{{ url_for('main.view_paste', slug=paste.slug) }}" class="paste-card-link">
+        <div class="paste-card">
+          <div class="paste-card-header">
+            <span class="lang-badge lang-badge-sm">
+              <i class="bi bi-code me-1"></i>{{ paste.language }}
+            </span>
+            <span class="paste-card-time">{{ time_ago(paste.created_at) }}</span>
+          </div>
+          <h3 class="paste-card-title">{{ paste.title or 'Untitled Paste' }}</h3>
+          <div class="paste-card-footer">
+            <span class="paste-card-meta">
+              <i class="bi bi-eye me-1"></i>{{ paste.views }} views
+            </span>
+            <span class="paste-card-meta">
+              <i class="bi bi-link-45deg me-1"></i>{{ paste.slug }}
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page > 1 or has_next %}
+  <div class="pagination-bar mt-4 d-flex justify-content-center gap-2">
+    {% if page > 1 %}
+    <a href="{{ url_for('main.explore', q=search, lang=language, page=page-1) }}"
+       class="btn btn-secondary">
+      <i class="bi bi-chevron-left me-1"></i>Previous
+    </a>
+    {% endif %}
+    <span class="btn btn-ghost disabled">Page {{ page }}</span>
+    {% if has_next %}
+    <a href="{{ url_for('main.explore', q=search, lang=language, page=page+1) }}"
+       class="btn btn-secondary">
+      Next<i class="bi bi-chevron-right ms-1"></i>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+    <h3>No pastes found</h3>
+    {% if search or language %}
+    <p>Try adjusting your filters or <a href="{{ url_for('main.explore') }}">clear them</a>.</p>
+    {% else %}
+    <p>Be the first to share some code!</p>
+    {% endif %}
+    <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">
+      <i class="bi bi-plus-circle me-2"></i>Create Paste
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
